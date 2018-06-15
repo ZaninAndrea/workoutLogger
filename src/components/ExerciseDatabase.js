@@ -2,33 +2,43 @@ import React from "react";
 import { Route, Link } from "react-router-dom";
 import NewExercise from "./NewExercise";
 import Exercise from "./Exercise";
+import defaultExerciseDatabase from "../utils/defaultExerciseDatabase";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+
+const exercises = defaultExerciseDatabase.sort(
+  (a, b) => (a.name === b.name ? 0 : a.name > b.name ? 1 : -1)
+);
 
 const ExerciseDatabase = ({ match }) => (
-  <div>
-    <h2>Topics</h2>
-    <ul>
-      <li>
-        <Link to={`${match.url}/exercise-rendering`}>Rendering with React</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/exercise-components`}>Components</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/exercise-props-v-state`}>Props v. State</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/new`}>Add New one</Link>
-      </li>
-    </ul>
-
-    <Route path={`${match.path}/exercise-:topicId`} component={Exercise} />
-    <Route path={`${match.path}/new`} component={NewExercise} />
+  <React.Fragment>
     <Route
       exact
       path={match.path}
-      render={() => <h3>Please select a topic.</h3>}
+      render={() => (
+        <List component="nav">
+          {exercises.map(exercise => (
+            <ListItem
+              component={Link}
+              //TODO: use slug function
+              to={`${match.url}/exercise-${exercise.name}`}
+              button
+            >
+              <ListItemText
+                primary={exercise.name}
+                secondary={`Clock: ${
+                  exercise.showActiveTime ? "Yes" : "No"
+                } Weight: ${exercise.showWeight ? "Yes" : "No"}`}
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
     />
-  </div>
+    <Route path={`${match.path}/exercise-:topicId`} component={Exercise} />
+    <Route path={`${match.path}/new`} component={NewExercise} />
+  </React.Fragment>
 );
 
 export default ExerciseDatabase;

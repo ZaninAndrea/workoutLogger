@@ -8,14 +8,12 @@ import NewWorkout from "./components/NewWorkout";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
+import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/Inbox";
-import DraftsIcon from "@material-ui/icons/Drafts";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Hidden from "@material-ui/core/Hidden";
@@ -27,7 +25,7 @@ const drawerWidth = 240;
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    height: 430,
+    // height: 430,
     zIndex: 1,
     overflow: "hidden",
     position: "relative",
@@ -72,7 +70,7 @@ class ResponsiveDrawer extends React.Component {
   render() {
     const { classes, theme } = this.props;
 
-    const drawer = (
+    const drawerContent = (
       <div>
         <div className={classes.toolbar} />
         <List component="nav">
@@ -82,7 +80,7 @@ class ResponsiveDrawer extends React.Component {
             onClick={this.handleDrawerToggle}
             button
           >
-            Home
+            <ListItemText primary="Home" />
           </ListItem>
           <ListItem
             component={Link}
@@ -90,7 +88,7 @@ class ResponsiveDrawer extends React.Component {
             onClick={this.handleDrawerToggle}
             button
           >
-            Exercises
+            <ListItemText primary="Exercises" />
           </ListItem>
           <ListItem
             component={Link}
@@ -98,7 +96,7 @@ class ResponsiveDrawer extends React.Component {
             onClick={this.handleDrawerToggle}
             button
           >
-            Add Workout
+            <ListItemText primary="New Workout" />
           </ListItem>
           <ListItem
             component={Link}
@@ -106,7 +104,7 @@ class ResponsiveDrawer extends React.Component {
             onClick={this.handleDrawerToggle}
             button
           >
-            Past Workouts
+            <ListItemText primary="Past Workouts" />
           </ListItem>
         </List>
       </div>
@@ -125,13 +123,41 @@ class ResponsiveDrawer extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
+
+              {/* change title depending on route */}
               <Typography variant="title" color="inherit" noWrap>
-                Responsive drawer
+                <Route exact path="/" component={() => "Home"} />
+
+                <Route
+                  path="/exercises"
+                  exact
+                  component={() => "Exercise Database"}
+                />
+                <Route
+                  path={`/exercises/exercise-:topicId`}
+                  component={({ match }) => match.params.topicId}
+                />
+                <Route
+                  path={`/exercises/new`}
+                  component={() => "New Exercise"}
+                />
+
+                <Route
+                  path="/workouts"
+                  exact
+                  component={() => "Past Workouts"}
+                />
+                <Route
+                  path={`/workouts/:topicId`}
+                  component={({ match }) => match.params.topicId}
+                />
+                <Route path="/newWorkout" component={() => "New Workout"} />
               </Typography>
             </Toolbar>
           </AppBar>
+          {/* temporary drawer shown on mobile */}
           <Hidden mdUp>
-            <Drawer
+            <SwipeableDrawer
               variant="temporary"
               anchor={"left"}
               open={this.state.mobileOpen}
@@ -143,9 +169,10 @@ class ResponsiveDrawer extends React.Component {
                 keepMounted: true // Better open performance on mobile.
               }}
             >
-              {drawer}
-            </Drawer>
+              {drawerContent}
+            </SwipeableDrawer>
           </Hidden>
+          {/* permanent drawer shown on PC */}
           <Hidden smDown implementation="css">
             <Drawer
               variant="permanent"
@@ -154,14 +181,16 @@ class ResponsiveDrawer extends React.Component {
                 paper: classes.drawerPaper
               }}
             >
-              {drawer}
+              {drawerContent}
             </Drawer>
           </Hidden>
 
-          <Route exact path="/" component={Home} />
-          <Route path="/exercises" component={ExerciseDatabase} />
-          <Route path="/workouts" component={PastWorkouts} />
-          <Route path="/newWorkout" component={NewWorkout} />
+          <div className="pageContent">
+            <Route exact path="/" component={Home} />
+            <Route path="/exercises" component={ExerciseDatabase} />
+            <Route path="/workouts" component={PastWorkouts} />
+            <Route path="/newWorkout" component={NewWorkout} />
+          </div>
         </div>
       </Router>
     );

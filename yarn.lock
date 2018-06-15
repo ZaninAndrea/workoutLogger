@@ -5759,6 +5759,12 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-calendar-material@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/react-calendar-material/-/react-calendar-material-0.1.8.tgz#748c6f72447b946d16d034a6062c3afada5b2794"
+  dependencies:
+    prop-types "^15.6.0"
+
 react-dev-utils@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-5.0.1.tgz#1f396e161fe44b595db1b186a40067289bf06613"

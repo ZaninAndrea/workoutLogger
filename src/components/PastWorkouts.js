@@ -1,33 +1,67 @@
-import React from "react";
-import { Route, Link } from "react-router-dom";
+import React, { Component } from "react";
+import { Route, Link, Redirect } from "react-router-dom";
 import PastWorkout from "./PastWorkout";
+import Calendar from "react-calendar-material";
+// TODO: fork calendar add dots and allow smaller width
+import sampleTrainings from "../utils/sampleTrainings";
 
-const PastWorkouts = ({ match }) => (
-  <div>
-    <h2>Topics</h2>
-    <ul>
-      <li>
-        <Link to={`${match.url}/rendering`}>Rendering with React</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/components`}>Components</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/props-v-state`}>Props v. State</Link>
-      </li>
+const trainings = sampleTrainings;
 
-      <li>
-        <Link to={`/newWorkout`}>Add New one</Link>
-      </li>
-    </ul>
+function sameDay(a, b) {
+  return (
+    a.getDate() === b.getDate() &&
+    a.getMonth() === b.getMonth() &&
+    a.getYear() === b.getYear()
+  );
+}
 
-    <Route path={`${match.path}/:topicId`} component={PastWorkout} />
-    <Route
-      exact
-      path={match.path}
-      render={() => <h3>Please select a topic.</h3>}
-    />
-  </div>
-);
+class PastWorkouts extends Component {
+  state = {
+    redirect: null
+  };
+
+  render() {
+    const match = this.props.match;
+
+    return (
+      <React.Fragment>
+        <Route
+          path={`${match.path}/training-:trainingId`}
+          component={PastWorkout}
+        />
+        <Route
+          exact
+          path={match.path}
+          render={() => (
+            <div>
+              <Calendar
+                // accentColor={"blue"}
+                orientation={"flex-row"}
+                showHeader={false}
+                onDatePicked={d => {
+                  for (const training of trainings) {
+                    if (sameDay(training.date, d)) {
+                      this.setState({
+                        redirect: `${match.path}/training-${training.id}`
+                      });
+                    }
+                  }
+                }}
+              />
+              {this.state.redirect && <Redirect to={this.state.redirect} />}
+            </div>
+          )}
+        />
+      </React.Fragment>
+    );
+  }
+
+  componentDidUpdate() {
+    if (this.state.redirect) {
+      //FIXME: this triggers a double rendering
+      this.setState({ redirect: null });
+    }
+  }
+}
 
 export default PastWorkouts;

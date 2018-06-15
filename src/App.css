@@ -4,7 +4,7 @@ body {
 
 .pageContent {
   height: calc(100vh - 56px);
-  padding-top: 56px; /* this should be made responsive: on big screens the bar is 64px */
+  margin-top: 56px; /* this should be made responsive: on big screens the bar is 64px */
   overflow: auto;
   width: 100%;
 }

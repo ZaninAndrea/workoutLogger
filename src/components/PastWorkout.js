@@ -3,9 +3,11 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import sampleTrainings from "../utils/sampleTrainings";
 
-const trainings = sampleTrainings;
-
 const PastWorkout = ({ match }) => {
+  let trainings = sampleTrainings;
+  const loadedTrainingsString = window.localStorage.getItem("trainings");
+  if (loadedTrainingsString) trainings = JSON.parse(loadedTrainingsString);
+
   const training = trainings.find(
     training => training.id === match.params.trainingId
   );

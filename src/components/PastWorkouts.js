@@ -5,8 +5,6 @@ import Calendar from "react-calendar-material";
 // TODO: fork calendar add dots and allow smaller width
 import sampleTrainings from "../utils/sampleTrainings";
 
-const trainings = sampleTrainings;
-
 function sameDay(a, b) {
   return (
     a.getDate() === b.getDate() &&
@@ -21,6 +19,10 @@ class PastWorkouts extends Component {
   };
 
   render() {
+    let trainings = sampleTrainings;
+    const loadedTrainingsString = window.localStorage.getItem("trainings");
+    if (loadedTrainingsString) trainings = JSON.parse(loadedTrainingsString);
+
     const match = this.props.match;
 
     return (
@@ -40,7 +42,7 @@ class PastWorkouts extends Component {
                 showHeader={false}
                 onDatePicked={d => {
                   for (const training of trainings) {
-                    if (sameDay(training.date, d)) {
+                    if (sameDay(new Date(training.date), d)) {
                       this.setState({
                         redirect: `${match.path}/training-${training.id}`
                       });

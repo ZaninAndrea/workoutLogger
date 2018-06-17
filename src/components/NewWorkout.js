@@ -5,6 +5,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import Button from "@material-ui/core/Button";
 import defaultExerciseDatabase from "../utils/defaultExerciseDatabase";
 
 const allExercises = defaultExerciseDatabase.sort(
@@ -16,72 +17,140 @@ const renderExerciseDetails = (
   elevation,
   exerciseTemplate,
   allowSuperserie,
-  updateExerciseName,
-  updateSuperserieExerciseName
-) => (
-  <Paper elevation={elevation} className="exerciseCard">
-    <Select
-      value={exercise.name}
-      onChange={updateExerciseName}
-      style={{ width: "100%" }}
-      renderValue={value =>
-        value === "" ? (
-          <i>Choose an exercise</i>
-        ) : value === "Superserie" ? (
-          <b>Superserie</b>
-        ) : (
-          value
-        )
-      }
-      displayEmpty
-    >
-      <MenuItem value="" disabled>
-        Choose an exercise
-      </MenuItem>
-      {allowSuperserie && (
-        <MenuItem value="Superserie">
-          <b>Superserie</b>
-        </MenuItem>
-      )}
+  updateExercise,
+  updateSuperserieExerciseName,
+  addSuperserieExercise
+) => {
+  const updateExerciseName = e => {
+    const exTemplate = allExercises.find(ex => ex.name === e.target.value);
 
-      {allExercises.map(ex => <MenuItem value={ex.name}>{ex.name}</MenuItem>)}
-    </Select>
-    <Typography component="p">
-      Sets: <input type="number" value={exercise.sets} />
-      {exerciseTemplate && (
-        <React.Fragment>
-          <br />Reps: <input type="number" />
-        </React.Fragment>
-      )}
-      {exerciseTemplate &&
-        exerciseTemplate.showActiveTime && (
-          <React.Fragment>
-            <br />Time: <input type="number" />
-          </React.Fragment>
-        )}
-      {exerciseTemplate &&
-        exerciseTemplate.showWeight && (
-          <React.Fragment>
-            <br />Weight: <input type="number" />
-          </React.Fragment>
-        )}
-    </Typography>
-    {exercise.superserie
-      ? exercise.exercises.map((ex, superserieExerciseIdx) =>
-          renderExerciseDetails(
-            ex,
-            2,
-            allExercises.find(databaseEx => ex.name === databaseEx.name),
-            false,
-            updateSuperserieExerciseName(superserieExerciseIdx)
+    updateExercise({
+      name: e.target.value,
+      superserie: e.target.value === "Superserie",
+      sets: 3,
+      reps: e.target.value === "Superserie" ? undefined : 3,
+      weight: exTemplate && exTemplate.showWeight ? 0 : undefined,
+      time: exTemplate && exTemplate.showActiveTime ? 0 : undefined,
+      exercises:
+        e.target.value === "Superserie" ? [{ name: "", sets: 3 }] : undefined
+    });
+  };
+
+  return (
+    <Paper elevation={elevation} className="exerciseCard">
+      <Select
+        value={exercise.name}
+        onChange={updateExerciseName}
+        style={{ width: "100%" }}
+        renderValue={value =>
+          value === "" ? (
+            <i>Choose an exercise</i>
+          ) : value === "Superserie" ? (
+            <b>Superserie</b>
+          ) : (
+            value
           )
-        )
-      : ""}
-  </Paper>
-);
+        }
+        displayEmpty
+      >
+        <MenuItem value="" disabled>
+          Choose an exercise
+        </MenuItem>
+        {allowSuperserie && (
+          <MenuItem value="Superserie">
+            <b>Superserie</b>
+          </MenuItem>
+        )}
+
+        {allExercises.map(ex => <MenuItem value={ex.name}>{ex.name}</MenuItem>)}
+      </Select>
+      <Typography component="p">
+        {exercise.name !== "" && (
+          <React.Fragment>
+            Sets:{" "}
+            <input
+              type="number"
+              value={exercise.sets}
+              onChange={e =>
+                updateExercise({
+                  sets: e.target.value
+                })
+              }
+            />
+          </React.Fragment>
+        )}
+
+        {exerciseTemplate && (
+          <React.Fragment>
+            <br />Reps:{" "}
+            <input
+              type="number"
+              value={exercise.reps}
+              onChange={e =>
+                updateExercise({
+                  reps: e.target.value
+                })
+              }
+            />
+          </React.Fragment>
+        )}
+        {exerciseTemplate &&
+          exerciseTemplate.showActiveTime && (
+            <React.Fragment>
+              <br />Time:{" "}
+              <input
+                type="number"
+                value={exercise.time}
+                onChange={e =>
+                  updateExercise({
+                    time: e.target.value
+                  })
+                }
+              />
+            </React.Fragment>
+          )}
+        {exerciseTemplate &&
+          exerciseTemplate.showWeight && (
+            <React.Fragment>
+              <br />Weight:{" "}
+              <input
+                type="number"
+                value={exercise.weight}
+                onChange={e =>
+                  updateExercise({
+                    weight: e.target.value
+                  })
+                }
+              />
+            </React.Fragment>
+          )}
+      </Typography>
+      {exercise.superserie ? (
+        <React.Fragment>
+          {exercise.exercises.map((ex, superserieExerciseIdx) =>
+            renderExerciseDetails(
+              ex,
+              2,
+              allExercises.find(databaseEx => ex.name === databaseEx.name),
+              false,
+              updateSuperserieExerciseName(superserieExerciseIdx)
+            )
+          )}
+          <Button variant="contained" onClick={addSuperserieExercise}>
+            Add exercise
+          </Button>
+        </React.Fragment>
+      ) : (
+        ""
+      )}
+    </Paper>
+  );
+};
 class NewWorkout extends Component {
   state = {
     training: {
+      id: (+new Date()).toString(), // unique id based on the number of milliseconds at the time of creation of the training
+      date: new Date(),
       exercises: [
         {
           name: ""
@@ -97,71 +166,60 @@ class NewWorkout extends Component {
         const exerciseTemplate = allExercises.find(
           ex => ex.name === exercise.name
         );
+        const updateExercise = updateObj =>
+          this.setState(({ training }) => ({
+            training: {
+              ...training,
+              exercises: training.exercises.map(
+                (value, id) =>
+                  renderedExerciseIndex === id
+                    ? {
+                        ...value,
+                        ...updateObj
+                      }
+                    : value
+              )
+            }
+          }));
 
-        const updateExerciseName = e =>
-          this.setState(({ training: { exercises } }) => {
-            const exTemplate = allExercises.find(
-              ex => ex.name === e.target.value
-            );
+        const updateSuperserieExercise = superserieExerciseIdx => updateObj =>
+          this.setState(({ training }) => ({
+            training: {
+              ...training,
+              exercises: training.exercises.map(
+                (superserieValue, id) =>
+                  renderedExerciseIndex === id
+                    ? {
+                        ...superserieValue,
+                        exercises: superserieValue.exercises.map(
+                          (exValue, idx) =>
+                            idx === superserieExerciseIdx
+                              ? {
+                                  ...exValue,
+                                  ...updateObj
+                                }
+                              : exValue
+                        )
+                      }
+                    : superserieValue
+              )
+            }
+          }));
+
+        const addSuperserieExercise = () =>
+          this.setState(({ training }) => {
             return {
               training: {
-                exercises: exercises.map(
-                  (value, id) =>
-                    renderedExerciseIndex === id
-                      ? {
-                          ...value,
-                          name: e.target.value,
-                          superserie: e.target.value === "Superserie",
-                          sets: 3,
-                          reps: e.target.value === "Superserie" ? undefined : 3,
-                          weight:
-                            exTemplate && exTemplate.showWeight ? 0 : undefined,
-                          time:
-                            exTemplate && exTemplate.showActiveTime
-                              ? 0
-                              : undefined,
-                          exercises:
-                            e.target.value === "Superserie"
-                              ? [{ name: "", sets: 3 }]
-                              : undefined
-                        }
-                      : value
-                )
-              }
-            };
-          });
-
-        const updateSuperserieExerciseName = superserieExerciseIdx => e =>
-          this.setState(({ training: { exercises } }) => {
-            // Exercise Database entry corresponding to the exercise being selected
-            const exTemplate = allExercises.find(
-              ex => ex.name === e.target.value
-            );
-
-            return {
-              training: {
-                exercises: exercises.map(
+                ...training,
+                exercises: training.exercises.map(
                   (superserieValue, id) =>
                     renderedExerciseIndex === id
                       ? {
                           ...superserieValue,
-                          exercises: superserieValue.exercises.map(
-                            (exValue, idx) =>
-                              idx === superserieExerciseIdx
-                                ? {
-                                    ...exValue,
-                                    name: e.target.value,
-                                    sets: 3,
-                                    reps: 3,
-                                    weight: exTemplate.showWeight
-                                      ? 0
-                                      : undefined,
-                                    time: exTemplate.showActiveTime
-                                      ? 0
-                                      : undefined
-                                  }
-                                : exValue
-                          )
+                          exercises: [
+                            ...superserieValue.exercises,
+                            { name: "" }
+                          ]
                         }
                       : superserieValue
                 )
@@ -174,16 +232,45 @@ class NewWorkout extends Component {
           4,
           exerciseTemplate,
           true,
-          updateExerciseName,
-          updateSuperserieExerciseName
+          updateExercise,
+          updateSuperserieExercise,
+          addSuperserieExercise
         );
       }
     );
 
     return (
       <div>
-        DATE_PICKER
+        {this.state.training.date.toString()}
         {exercises}
+        <Button
+          variant="contained"
+          onClick={() =>
+            this.setState(({ training: { exercises } }) => ({
+              training: {
+                exercises: [
+                  ...exercises,
+                  {
+                    name: ""
+                  }
+                ]
+              }
+            }))
+          }
+        >
+          Add exercise
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            window.localStorage.setItem(
+              "trainings",
+              JSON.stringify([this.state.training])
+            ); //FIXME: overwrites all trainings
+          }}
+        >
+          Save
+        </Button>
       </div>
     );
   }

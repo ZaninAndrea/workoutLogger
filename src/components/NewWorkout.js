@@ -8,7 +8,11 @@ import FormControl from "@material-ui/core/FormControl";
 import Button from "@material-ui/core/Button";
 import defaultExerciseDatabase from "../utils/defaultExerciseDatabase";
 
-const allExercises = defaultExerciseDatabase.sort(
+let customExercises = [];
+const loadedCustomExercises = window.localStorage.getItem("exercises");
+if (loadedCustomExercises) customExercises = JSON.parse(loadedCustomExercises);
+
+const allExercises = [...defaultExerciseDatabase, ...customExercises].sort(
   (a, b) => (a.name === b.name ? 0 : a.name > b.name ? 1 : -1)
 );
 
@@ -246,10 +250,11 @@ class NewWorkout extends Component {
         <Button
           variant="contained"
           onClick={() =>
-            this.setState(({ training: { exercises } }) => ({
+            this.setState(({ training }) => ({
               training: {
+                ...training,
                 exercises: [
-                  ...exercises,
+                  ...training.exercises,
                   {
                     name: ""
                   }
@@ -263,10 +268,17 @@ class NewWorkout extends Component {
         <Button
           variant="contained"
           onClick={() => {
-            window.localStorage.setItem(
-              "trainings",
-              JSON.stringify([this.state.training])
-            ); //FIXME: overwrites all trainings
+            let trainings = [];
+            const loadedTrainingsString = window.localStorage.getItem(
+              "trainings"
+            );
+            if (loadedTrainingsString)
+              trainings = JSON.parse(loadedTrainingsString);
+
+            trainings.push(this.state.training);
+            window.localStorage.setItem("trainings", JSON.stringify(trainings));
+
+            window.location.href = "/workouts"; //FIXME: this doesn't use react routers
           }}
         >
           Save

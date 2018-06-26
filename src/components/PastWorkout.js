@@ -1,10 +1,9 @@
 import React from "react";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
-import sampleTrainings from "../utils/sampleTrainings";
 
 const PastWorkout = ({ match }) => {
-  let trainings = sampleTrainings;
+  let trainings = [];
   const loadedTrainingsString = window.localStorage.getItem("trainings");
   if (loadedTrainingsString) trainings = JSON.parse(loadedTrainingsString);
 

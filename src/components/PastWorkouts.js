@@ -3,7 +3,6 @@ import { Route, Link, Redirect } from "react-router-dom";
 import PastWorkout from "./PastWorkout";
 import Calendar from "react-calendar-material";
 // TODO: fork calendar add dots and allow smaller width
-import sampleTrainings from "../utils/sampleTrainings";
 
 function sameDay(a, b) {
   return (
@@ -19,7 +18,7 @@ class PastWorkouts extends Component {
   };
 
   render() {
-    let trainings = sampleTrainings;
+    let trainings = [];
     const loadedTrainingsString = window.localStorage.getItem("trainings");
     if (loadedTrainingsString) trainings = JSON.parse(loadedTrainingsString);
 

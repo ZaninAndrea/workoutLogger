@@ -30,9 +30,9 @@ class ExerciseDatabase extends React.Component {
             },
         })
             .then(res => res.json())
-            .then(customExercises =>
+            .then(res =>
                 this.setState({
-                    exercises: buildExercisesList(customExercises),
+                    exercises: buildExercisesList(res.exercises),
                     loading: false,
                 })
             )

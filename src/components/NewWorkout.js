@@ -198,7 +198,6 @@ class NewWorkout extends Component {
         this.state = {
             loading: true,
             training: {
-                id: (+new Date()).toString(), // unique id based on the number of milliseconds at the time of creation of the training
                 date: new Date(),
                 exercises: [
                     {
@@ -217,9 +216,9 @@ class NewWorkout extends Component {
             },
         })
             .then(res => res.json())
-            .then(customExercises =>
+            .then(res =>
                 this.setState({
-                    allExercises: buildExercisesList(customExercises),
+                    allExercises: buildExercisesList(res.exercises),
                     loading: false,
                 })
             )

@@ -23,9 +23,9 @@ class Exercise extends React.Component {
             },
         })
             .then(res => res.json())
-            .then(customExercises =>
+            .then(res =>
                 this.setState(({ loading }) => ({
-                    exercises: buildExercisesList(customExercises),
+                    exercises: buildExercisesList(res.exercises),
                     loading: loading + 1,
                 }))
             )
@@ -38,7 +38,7 @@ class Exercise extends React.Component {
             },
         })
             .then(res => res.json())
-            .then(workouts =>
+            .then(({ workouts }) =>
                 this.setState(({ loading }) => ({
                     workouts,
                     loading: loading + 1,
@@ -65,7 +65,7 @@ class Exercise extends React.Component {
                     acc.push({
                         ...exercise,
                         date: current.date,
-                        trainingId: current.id,
+                        trainingId: current._id,
                         volume,
                     })
                 }

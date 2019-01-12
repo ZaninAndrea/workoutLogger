@@ -1,6 +1,7 @@
 import React from "react"
 import { Link } from "react-router-dom"
 import defaultExerciseDatabase from "../utils/defaultExerciseDatabase"
+import Graph from "./Graph"
 
 const buildExercisesList = customExercises =>
     [...defaultExerciseDatabase, ...customExercises].sort((a, b) =>
@@ -56,44 +57,50 @@ class Exercise extends React.Component {
 
         console.log(this.state)
 
+        const addRelevantExercises = (acc, current) => exercise => {
+            if (exercise.name === match.params.topicId) {
+                let volume = exercise.reps * exercise.sets
+                if (exTemplate.showActiveTime) volume *= exercise.time
+                if (exTemplate.showWeight) volume *= exercise.weight
+                acc.push({
+                    ...exercise,
+                    date: current.date,
+                    trainingId: current._id,
+                    volume,
+                })
+            } else if (exercise.name === "Superserie") {
+                exercise.exercises.map(addRelevantExercises(acc, current))
+            }
+        }
         const occurrences = this.state.workouts.reduce((acc, current) => {
-            current.exercises.map(exercise => {
-                if (exercise.name === match.params.topicId) {
-                    let volume = exercise.reps * exercise.sets
-                    if (exTemplate.showActiveTime) volume *= exercise.time
-                    if (exTemplate.showWeight) volume *= exercise.weight
-                    acc.push({
-                        ...exercise,
-                        date: current.date,
-                        trainingId: current._id,
-                        volume,
-                    })
-                }
-            })
+            current.exercises.map(addRelevantExercises(acc, current))
             return acc
         }, [])
 
         if (occurrences.length === 0)
             return <div>You've never done this exercise</div>
 
-        let bestReps, bestWeight, bestTime, bestVolume
-
-        bestReps = occurrences.reduce((acc, curr) =>
+        let bestReps = occurrences.reduce((acc, curr) =>
             curr.reps > acc.reps ? curr : acc
         )
-        bestWeight = exTemplate.showWeight
+        let bestWeight = exTemplate.showWeight
             ? occurrences.reduce((acc, curr) =>
                   curr.weight > acc.weight ? curr : acc
               )
             : null
-        bestTime = exTemplate.showActiveTime
+        let bestTime = exTemplate.showActiveTime
             ? occurrences.reduce((acc, curr) =>
                   curr.time > acc.time ? curr : acc
               )
             : null
-        bestVolume = occurrences.reduce((acc, curr) =>
+        let bestVolume = occurrences.reduce((acc, curr) =>
             curr.volume > acc.volume ? curr : acc
         )
+
+        let graphData = []
+        for (let i = 0; i < occurrences.length; i++) {
+            graphData.push([i, occurrences[i].time, true])
+        }
 
         return (
             <div>
@@ -123,6 +130,8 @@ class Exercise extends React.Component {
                 <Link to={`/workouts/training-${bestVolume.trainingId}`}>
                     Best volume: {bestReps.volume}
                 </Link>
+                <br />
+                <Graph data={graphData} />
             </div>
         )
     }

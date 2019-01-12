@@ -1,10 +1,10 @@
 import React, { Component } from "react"
 import { line, curveNatural, area } from "d3-shape"
-import { scaleLinear } from "d3-scale"
+import { scaleLinear, scaleTime } from "d3-scale"
 
 class Graph extends Component {
     render() {
-        const { maxPoints = 10, data } = this.props
+        const { maxPoints = 20, data } = this.props
 
         // gets the last <maxPoints> points
         let slice =
@@ -27,13 +27,29 @@ class Graph extends Component {
         const xData = parsedData.map(el => el[0])
         const yData = parsedData.map(el => el[1])
 
-        const domainX = [Math.min(...xData), Math.max(...xData)]
+        const minDate = arr => {
+            let min = arr[0]
+            for (let i = 0; i < arr.length; i++) {
+                if (+arr[i] < +min) min = arr[i]
+            }
+
+            return min
+        }
+        const maxDate = arr => {
+            let max = arr[0]
+            for (let i = 0; i < arr.length; i++) {
+                if (+arr[i] > +max) max = arr[i]
+            }
+
+            return max
+        }
+        const domainX = [minDate(xData), maxDate(xData)]
         const rangeX = [40, 410]
 
         const domainY = [Math.min(...yData), Math.max(...yData)]
         const rangeY = [195, 20] // reversed because the y axis is reversed in SVG
 
-        const scaleX = scaleLinear()
+        const scaleX = scaleTime()
             .domain(domainX)
             .range(rangeX)
 

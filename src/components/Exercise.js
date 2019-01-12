@@ -57,9 +57,16 @@ class Exercise extends React.Component {
 
         console.log(this.state)
 
-        const addRelevantExercises = (acc, current) => exercise => {
+        const addRelevantExercises = (
+            acc,
+            current,
+            parentSets = null
+        ) => exercise => {
             if (exercise.name === match.params.topicId) {
-                let volume = exercise.reps * exercise.sets
+                let volume =
+                    parentSets !== null
+                        ? exercise.reps * parentSets
+                        : exercise.reps * exercise.sets
                 if (exTemplate.showActiveTime) volume *= exercise.time
                 if (exTemplate.showWeight) volume *= exercise.weight
                 acc.push({
@@ -69,7 +76,9 @@ class Exercise extends React.Component {
                     volume,
                 })
             } else if (exercise.name === "Superserie") {
-                exercise.exercises.map(addRelevantExercises(acc, current))
+                exercise.exercises.map(
+                    addRelevantExercises(acc, current, exercise.sets)
+                )
             }
         }
         const occurrences = this.state.workouts.reduce((acc, current) => {
@@ -97,9 +106,46 @@ class Exercise extends React.Component {
             curr.volume > acc.volume ? curr : acc
         )
 
-        let graphData = []
+        let timeGraphData = null
+        if (exTemplate.showActiveTime) {
+            timeGraphData = []
+            for (let i = 0; i < occurrences.length; i++) {
+                timeGraphData.push([
+                    new Date(occurrences[i].date),
+                    occurrences[i].time,
+                    true,
+                ])
+            }
+        }
+
+        let weightGraphData = null
+        if (exTemplate.showWeight) {
+            weightGraphData = []
+            for (let i = 0; i < occurrences.length; i++) {
+                weightGraphData.push([
+                    new Date(occurrences[i].date),
+                    occurrences[i].weight,
+                    true,
+                ])
+            }
+        }
+
+        let repsGraphData = []
         for (let i = 0; i < occurrences.length; i++) {
-            graphData.push([i, occurrences[i].time, true])
+            repsGraphData.push([
+                new Date(occurrences[i].date),
+                occurrences[i].reps,
+                true,
+            ])
+        }
+
+        let volumeGraphData = []
+        for (let i = 0; i < occurrences.length; i++) {
+            volumeGraphData.push([
+                new Date(occurrences[i].date),
+                occurrences[i].volume,
+                true,
+            ])
         }
 
         return (
@@ -108,12 +154,18 @@ class Exercise extends React.Component {
                 <Link to={`/workouts/training-${bestReps.trainingId}`}>
                     Best reps: {bestReps.reps}
                 </Link>
+                <br />
+                <Graph data={repsGraphData} />
+
                 {bestTime && (
                     <React.Fragment>
                         <br />
                         <Link to={`/workouts/training-${bestTime.trainingId}`}>
                             Best time: {bestReps.time}
                         </Link>
+
+                        <br />
+                        <Graph data={timeGraphData} />
                     </React.Fragment>
                 )}
                 {bestWeight && (
@@ -123,6 +175,8 @@ class Exercise extends React.Component {
                             to={`/workouts/training-${bestWeight.trainingId}`}
                         >
                             Best weight: {bestReps.weight}
+                            <br />
+                            <Graph data={weightGraphData} />
                         </Link>
                     </React.Fragment>
                 )}
@@ -131,7 +185,8 @@ class Exercise extends React.Component {
                     Best volume: {bestReps.volume}
                 </Link>
                 <br />
-                <Graph data={graphData} />
+                <Graph data={volumeGraphData} />
+                <br />
             </div>
         )
     }
